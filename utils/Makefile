@@ -32,10 +32,10 @@ endif
 all: run
 
 run: build
-	sudo python3 $(RUN_SCRIPT) -t $(TOPO) $(run_args)
+	python3 $(RUN_SCRIPT) -t $(TOPO) $(run_args)
 
 stop:
-	sudo mn -c
+	mn -c
 
 build: dirs $(compiled_json)
 
@@ -45,6 +45,8 @@ build: dirs $(compiled_json)
 dirs:
 	mkdir -p $(BUILD_DIR) $(PCAP_DIR) $(LOG_DIR)
 
-clean: stop
+clean: cclean stop
+	echo "done make clean"
+cclean:
 	rm -f *.pcap
 	rm -rf $(BUILD_DIR) $(PCAP_DIR) $(LOG_DIR)

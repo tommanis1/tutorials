@@ -26,7 +26,10 @@ header ethernet_t {
 header ipv4_t {
     bit<4>    version;
     bit<4>    ihl;
-    bit<8>    tos;
+    // bit<8>    tos;
+    bit<6>    diffserv;
+    bit<2>    ecn;
+
     bit<16>   totalLen;
     bit<16>   identification;
     bit<3>    flags;
@@ -128,6 +131,11 @@ control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
     apply {
+        if (hdr.ipv4.ecn == 1 || hdr.ipv4.ecn == 2) {
+            if(standard_metadata.enq_qdepth > ECN_THRESHOLD ) {
+                hdr.ipv4.ecn = 3;
+            }
+        }
         /*
          * TODO:
          * - if ecn is 1 or 2
@@ -148,7 +156,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
             hdr.ipv4.isValid(),
             { hdr.ipv4.version,
               hdr.ipv4.ihl,
-              hdr.ipv4.tos,
+              hdr.ipv4.diffserv,
+              hdr.ipv4.ecn,
               hdr.ipv4.totalLen,
               hdr.ipv4.identification,
               hdr.ipv4.flags,
